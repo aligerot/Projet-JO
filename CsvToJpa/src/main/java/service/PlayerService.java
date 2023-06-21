@@ -1,5 +1,6 @@
 package service;
 
+import entite.Player;
 import entite.Sport;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityTransaction;
@@ -10,27 +11,29 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
 
-public class SportService {
-    public void addSport(EntityManager em)throws IOException {
+public class PlayerService {
+    public void addPlayer(EntityManager em)throws IOException {
         EntityTransaction transaction = em.getTransaction();
         List<String> tempo= new ArrayList<>();
-        Set<Sport> sports = new HashSet<>();
-        Path chemin = Paths.get("liste des sports.csv");
+        Set<Player> players = new HashSet<>();
+        Path chemin = Paths.get("evenements.csv");
         if (Files.isRegularFile(chemin)) {
             List<String> lignes = Files.readAllLines(chemin);
             for (String ligne : lignes) {
                 tempo.clear();
-                if (!ligne.contains("Libelle")) {
+                if (!ligne.contains("ID;")) {
                     String[] col = ligne.split(";");
-                    tempo.addAll(Arrays.asList(col));
-                    if(col.length==2){//certains sports s'appellent de la meme facon en anglais et en fr
-                    Sport tempoSport = new Sport(tempo.get(1).trim(),tempo.get(0).trim());
-                        sports.add(tempoSport);
+
+                    for (String nom : col) {
+                        while (nom.startsWith(" ") || nom.endsWith(" ")) {
+                            nom = nom.trim();
+                        }
+                        tempo.add(nom);
                     }
-                    if(col.length==1){
-                        Sport tempoSport = new Sport(tempo.get(0).trim());
-                        sports.add(tempoSport);
-                    }
+
+
+                    Player player = new Player(tempo.get(1).replaceAll("\"([^\"]*)\"","$1"));
+                    players.add(player);
 
                 }
             }
@@ -39,8 +42,8 @@ public class SportService {
             System.out.println("PAS TROUVE");
         }
         transaction.begin();
-        for (Sport sport : sports) {
-            em.persist(sport);
+        for (Player playertempo : players) {
+            em.persist(playertempo);
         }
         transaction.commit();
     }

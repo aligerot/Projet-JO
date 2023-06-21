@@ -1,11 +1,10 @@
 package app;
 
+import entite.Evenement;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.Persistence;
-import service.CountryService;
-import service.EpreuveService;
-import service.SportService;
+import service.*;
 
 import java.io.IOException;
 
@@ -19,7 +18,18 @@ public class Main {
         ss.addSport(em);
         es.addEpreuve(em);
         cs.addCountry(em);
+        GameService gs= new GameService();
+        gs.addGame(em);
+        PlayerService ps= new PlayerService();
+        ps.addPlayer(em);
+
+        EventService evs = new EventService();
+        evs.addEvent(em);
+
+
         em.close();
+
+
 
     }
 }

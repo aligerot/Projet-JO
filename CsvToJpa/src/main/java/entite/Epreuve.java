@@ -16,6 +16,10 @@ public class Epreuve {
     @Column
     String nameEn;
 
+    @ManyToOne(cascade = {CascadeType.PERSIST,CascadeType.MERGE})
+    @JoinColumn(referencedColumnName = "id")
+    Sport sport;
+
     @Column
     Sex sex;
 

@@ -26,9 +26,6 @@ public class CountryService {
                     String[] col = ligne.split(";");
                     for (String nom : col) {
                         nom= nom.replaceAll("\\s*\u00A0\\s*", "");//pour enlever les "nbsp" aleatoire dans le fichier
-                        while (nom.startsWith(" ") || nom.endsWith(" ")) {
-                            nom = nom.trim();
-                        }
                         tempo.add(nom);
                     }
                     if(Objects.equals(tempo.get(col.length-1), "N")){
