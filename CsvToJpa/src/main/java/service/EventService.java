@@ -27,7 +27,10 @@ public class EventService {
             for (String ligne : lignes) {
                 tempo.clear();
                 nbLignePasse++;
-                if ((!ligne.contains("ID;")) && nbLignePasse<100 ) {
+                if(nbLignePasse%100==1){
+                    System.out.println("-----------------------------------"+nbLignePasse);
+                System.out.println(nbLignePasse/lignes.size()*100+"%");}
+                if ((!ligne.contains("ID;")) && nbLignePasse<300 ) {
                     String[] col = ligne.split(";");
                     for (String nom : col) {
                         while (nom.startsWith(" ") || nom.endsWith(" ")) {
@@ -36,7 +39,6 @@ public class EventService {
                         tempo.add(nom);
                     }
                     Evenement event = new Evenement();
-                    event.setId(Integer.parseInt(tempo.get(0)));
 
 
                     TypedQuery<Player> queryPlayer = em.createQuery("select a from Player a where a.name=?1", Player.class);
@@ -51,18 +53,27 @@ public class EventService {
                     if(tempo.get(2).equals("F")){
                     event.setSex(Sex.WOMEN);
                     }
-                    event.setAge(Integer.parseInt(tempo.get(3)));
-                    event.setHeight(Integer.parseInt(tempo.get(4)));
-                    event.setWeight(Integer.parseInt(tempo.get(5)));
+
+                   try{ event.setAge(Integer.parseInt(tempo.get(3)));}catch(Exception exception){event.setAge(0);}
+                    try{ event.setHeight(Integer.parseInt(tempo.get(4)));}catch(Exception exception){event.setHeight(0);}
+                        try{ event.setWeight(Integer.parseInt(tempo.get(5)));}catch(Exception exception){event.setWeight(0);}
                     String[] col2 = tempo.get(6).split("/");
                     List<Country>team = new ArrayList<>();
                     for(String nom:col2) {
-                        TypedQuery<Country> query1 = em.createQuery("select a from Country a where a.nameEn=?1", Country.class);
+                       try{ TypedQuery<Country> query1 = em.createQuery("select a from Country a where a.nameEn=?1", Country.class);
                         query1.setParameter(1,nom );
 
-                        team.add(query1.getSingleResult());
+                        team.add(query1.getSingleResult());}
+                       catch (Exception exception){
+                           TypedQuery<Country> query1 = em.createQuery("select a from Country a where a.nameEn=?1", Country.class);
+                           query1.setParameter(1,"Monaco" );
+
+                           team.add(query1.getSingleResult());}
+                        event.setTeam(team);
                     }
-                    event.setTeam(team);
+
+
+
 
 
                     event.setNOC(tempo.get(7));
@@ -82,15 +93,10 @@ public class EventService {
 
 
 
-                    TypedQuery<Epreuve> query5 = em.createQuery("select a from Epreuve a where a.nameEn=?1", Epreuve.class);
                     String nom=tempo.get(13);
                     //pour pouvoir récupérer l'epreuve en fonction du nom , il faut refaire le meme filtre
                     nom=nom.replaceFirst(tempo.get(12),"");
-                    nom=nom.replaceAll("Women's|women's","");
-                    nom=nom.replaceAll("Men's|men's","");
-                    nom=nom.replaceAll("women|Women","");
-                    nom=nom.replaceAll("men|Men","");
-                    nom=nom.replaceAll("mixte|Mixte|mixtes|Mixtes|mixed|Mixed","");
+
                     nom=nom.replaceAll("\\(W\\)","");
                     nom=nom.replaceAll("\\(M\\)","");
                     nom=nom.replaceAll("\\(H\\)","");
@@ -99,9 +105,34 @@ public class EventService {
                     nom=nom.replaceAll("\\(H\\+F\\)","");
                     nom=nom.replaceAll("\\(W\\+M\\)","");
                     nom=nom.replaceAll("\\(M\\+W\\)","");
+                    nom=nom.replaceAll("\\(men\\)","");
+                    Sex sex= Sex.MIXED;
+                    if (tempo.get(13).contains("Men's") ||tempo.get(13).contains("Men")|| tempo.get(13).contains("men")) {
+                        sex=Sex.MEN;
+                    }
+                    if(tempo.get(13).contains("Women's") || tempo.get(13).contains("Women") ||tempo.get(13).contains("women")){
+                        sex=Sex.WOMEN;
+                    }
+                    System.out.println(nom);
+
+                    nom=nom.replaceAll("Women's|women's","");
+                    nom=nom.replaceAll("Men's|men's","");
+                    nom=nom.replaceAll("women|Women","");
+                    nom=nom.replaceAll("men|Men","");
+                    nom=nom.replaceAll("mixte|Mixte|mixtes|Mixtes|mixed|Mixed","");
                     nom=nom.trim();
+
+
+                    TypedQuery<Epreuve> query5 = em.createQuery("select a from Epreuve a where a.nameEn=?1 and a.sport.nameEn=?2 and a.sex=?3", Epreuve.class);
                     query5.setParameter(1,nom);
-                    event.setEpreuve(query5.getSingleResult());
+                    query5.setParameter(2,tempo.get(12).trim());
+                    query5.setParameter(3,sex);
+
+
+
+                        System.out.println(tempo.get(12).trim()+"((((((((("+nom+"   "+sex);
+                   try{ event.setEpreuve(query5.getSingleResult());}catch(Exception exception){break;}
+
 
                     //ID;Name;Sex;Age;Height;Weight;Team;NOC;Games;Year;Season;City;Sport;Event;Medal
 
@@ -128,8 +159,7 @@ public class EventService {
         }
         transaction.begin();
         for (Evenement event : events) {
-            em.persist(event);
-        }
+            em.persist(event);}
         transaction.commit();
-    }
-}
+
+}}

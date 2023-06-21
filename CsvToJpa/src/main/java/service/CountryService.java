@@ -38,9 +38,9 @@ public class CountryService {
                     if(col.length==5){
                         Country tempoCountry;
                         if(!tempo.get(3).equals("")){
-                            tempoCountry = new Country(tempo.get(0), tempo.get(1), tempo.get(2), tempo.get(3), tempoBool);
+                            tempoCountry = new Country(tempo.get(0).trim(), tempo.get(1).trim(), tempo.get(2).trim(), tempo.get(3).trim(), tempoBool);
                         } else{
-                            tempoCountry = new Country(tempo.get(0), tempo.get(1), tempo.get(2), tempo.get(0), tempoBool);//le code ISO n'est pas mentionné des fois, par défaut je met qu'il est identique au code CIO
+                            tempoCountry = new Country(tempo.get(0).trim(), tempo.get(1).trim(), tempo.get(2).trim(), tempo.get(0).trim(), tempoBool);//le code ISO n'est pas mentionné des fois, par défaut je met qu'il est identique au code CIO
                         }
                         countries.add(tempoCountry);
                     }

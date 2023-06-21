@@ -7,6 +7,7 @@ import entite.Sport;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityTransaction;
 import jakarta.persistence.TypedQuery;
+import jakarta.persistence.criteria.CriteriaBuilder;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -18,10 +19,13 @@ public class EpreuveService {
     public void addEpreuve(EntityManager em)throws IOException {
         int compteurTour = 0;
         EntityTransaction transaction = em.getTransaction();
+        Map<Integer,List<String>> map = new HashMap<>();
         List<String> tempo= new ArrayList<>();
         List<String> tempoEvent= new ArrayList<>();
         List<String> tempoSport= new ArrayList<>();
         Set<Epreuve> epreuves = new HashSet<>();
+        Set<List<String>> set= new HashSet<>();
+
         boolean boo = false;
         Sex tempoSex;
         Sport futureSport= new Sport();
@@ -38,7 +42,19 @@ public class EpreuveService {
                     tempoSport.add(tempo.get(12));
 
             }
-        }}
+        }
+        }
+        for (int i = 1; i < tempoEvent.size(); i++) {
+            List<String> listForSet = new ArrayList<>();
+            listForSet.add(tempoEvent.get(i));
+            listForSet.add(tempoSport.get(i));
+            set.add(listForSet);
+        }
+        for (List<String> listed:set){
+            System.out.println(listed);
+        }
+        List<List<String>> listOfList = new ArrayList<>(set);
+
             //ID;Name;Sex;Age;Height;Weight;Team;NOC;Games;Year;Season;City;Sport;Event;Medal
 
 
@@ -71,20 +87,14 @@ public class EpreuveService {
                         nom=nom.replaceAll("\\(H\\+F\\)","");
                         nom=nom.replaceAll("\\(W\\+M\\)","");
                         nom=nom.replaceAll("\\(M\\+W\\)","");
-                        for (int i = 1; i < tempoEvent.size(); i++) {
-                            if(tempoEvent.get(i).trim().equals((tempoSport.get(i)+" "+nom).trim())){
+                        nom=nom.replaceAll("\\(men\\)","");
+                        for (int i = 1; i < listOfList.size(); i++) {
+                            if(tempoEvent.get(i).trim().equals((listOfList.get(i).get(1)+" "+nom).trim())){
                                 TypedQuery<Sport> query = em.createQuery("select a from Sport a where a.nameEn=?1", Sport.class);
-                                query.setParameter(1,tempoSport.get(i));
+                                query.setParameter(1, listOfList.get(i).get(1));
                                 futureSport=query.getSingleResult();
-                                tempoEvent.remove(i);
-                                tempoSport.remove(i);
-                                i=i-1;
-                                break;
                             }
                         }
-
-
-
                         nom=nom.replaceAll("Women's|women's","");
                         nom=nom.replaceAll("Men's|men's","");
                         nom=nom.replaceAll("women|Women","");
@@ -98,8 +108,8 @@ public class EpreuveService {
 
 
                     if(col.length==2){
-                        epreuve.setNameEn(tempo.get(1));
-                        epreuve.setNameFr(tempo.get(0));
+                        epreuve.setNameEn(tempo.get(0));
+                        epreuve.setNameFr(tempo.get(1));
                         epreuve.setSex(tempoSex);
                     }
                     if(col.length==1){
@@ -109,32 +119,23 @@ public class EpreuveService {
                     }
 
                     epreuve.setSport(futureSport);
-                    for(Epreuve epreu:epreuves){
-                        boo=false;
-                        if(epreu.getNameEn().equals(epreuve.getNameEn()) && epreu.getSport().equals(epreuve.getSport())){
-                            boo=true;
-                            break;
-                        }
-                    }
-                    if(!boo) {
-                        epreuves.add(epreuve);
+
+                    epreuves.add(epreuve);
                     }
                 }
             }
-        }
         else {
             System.out.println("PAS TROUVE");
         }
-        
-        
-        for(String tes:tempoEvent){
-            System.out.println(tes);
-        }
-        
+
+        System.out.println(listOfList.size());
         transaction.begin();
         for (Epreuve epreuve : epreuves) {
             em.persist(epreuve);
         }
         transaction.commit();
+
+
+
     }
 }

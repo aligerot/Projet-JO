@@ -10,6 +10,7 @@ import java.util.List;
 public class Evenement {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     int id;
 
     @Column
