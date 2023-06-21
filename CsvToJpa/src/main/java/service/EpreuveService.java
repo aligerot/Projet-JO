@@ -21,7 +21,8 @@ public class EpreuveService {
         List<String> tempo= new ArrayList<>();
         List<String> tempoEvent= new ArrayList<>();
         List<String> tempoSport= new ArrayList<>();
-        List<Epreuve> epreuves = new ArrayList<>();
+        Set<Epreuve> epreuves = new HashSet<>();
+        boolean boo = false;
         Sex tempoSex;
         Sport futureSport= new Sport();
         Path chemin = Paths.get("liste_des_epreuves.csv");
@@ -47,11 +48,11 @@ public class EpreuveService {
             for (String ligne : lignes) {
                 tempo.clear();
                 compteurTour++;
-                if(compteurTour%100==1){
+                if(compteurTour%70==1){
                     System.out.println(compteurTour);
                 }
                 tempoSex=Sex.MIXED;
-                if (!ligne.contains("Event") && compteurTour<=200) {
+                if (!ligne.contains("Event")) {
                     String[] col = ligne.split(";");
                     for (String nom : col) {
                         if(nom.contains("(H)")){
@@ -74,16 +75,15 @@ public class EpreuveService {
                             if(tempoEvent.get(i).trim().equals((tempoSport.get(i)+" "+nom).trim())){
                                 TypedQuery<Sport> query = em.createQuery("select a from Sport a where a.nameEn=?1", Sport.class);
                                 query.setParameter(1,tempoSport.get(i));
-                                System.out.println("----"+tempoSport.get(i));
-                                System.out.println("_______________"+tempoEvent.get(i).replaceFirst(tempoSport.get(i),"").trim());
-                                System.out.println("((((((((((((("+nom);
                                 futureSport=query.getSingleResult();
-                                System.out.println(futureSport);
                                 tempoEvent.remove(i);
                                 tempoSport.remove(i);
+                                i=i-1;
                                 break;
                             }
                         }
+
+
 
                         nom=nom.replaceAll("Women's|women's","");
                         nom=nom.replaceAll("Men's|men's","");
@@ -109,13 +109,28 @@ public class EpreuveService {
                     }
 
                     epreuve.setSport(futureSport);
-                    epreuves.add(epreuve);
+                    for(Epreuve epreu:epreuves){
+                        boo=false;
+                        if(epreu.getNameEn().equals(epreuve.getNameEn()) && epreu.getSport().equals(epreuve.getSport())){
+                            boo=true;
+                            break;
+                        }
+                    }
+                    if(!boo) {
+                        epreuves.add(epreuve);
+                    }
                 }
             }
         }
         else {
             System.out.println("PAS TROUVE");
         }
+        
+        
+        for(String tes:tempoEvent){
+            System.out.println(tes);
+        }
+        
         transaction.begin();
         for (Epreuve epreuve : epreuves) {
             em.persist(epreuve);

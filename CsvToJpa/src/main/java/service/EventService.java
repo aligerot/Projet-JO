@@ -65,10 +65,7 @@ public class EventService {
                     event.setTeam(team);
 
 
-                    TypedQuery<Country> query2 = em.createQuery("select a from Country a where a.CodeCIO=?1", Country.class);
-                    String countryName=tempo.get(7).replaceAll("\\s*\u00A0\\s*", "");
-                    query2.setParameter(1,countryName);
-                    event.setNOC(query2.getSingleResult());
+                    event.setNOC(tempo.get(7));
 
                     TypedQuery<Game> query3 = em.createQuery("select a from Game a where a.year=?1 and a.season=?2" , Game.class);
                     query3.setParameter(1,Integer.parseInt(tempo.get(9)));

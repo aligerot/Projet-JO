@@ -31,9 +31,7 @@ public class Evenement {
     )
     List<Country> team;
 
-    @ManyToOne
-    @JoinColumn(referencedColumnName = "id")
-    Country NOC;
+    String NOC;
 
     @ManyToOne
     @JoinColumn(referencedColumnName = "id")
