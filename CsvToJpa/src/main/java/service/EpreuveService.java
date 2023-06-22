@@ -16,20 +16,20 @@ import java.nio.file.Paths;
 import java.util.*;
 
 public class EpreuveService {
-    public void addEpreuve(EntityManager em)throws IOException {
+    public void addEpreuve(EntityManager em) throws IOException {
         int compteurTour = 0;
         EntityTransaction transaction = em.getTransaction();
-        Map<Integer,List<String>> map = new HashMap<>();
-        List<String> tempo= new ArrayList<>();
-        List<String> tempoEvent= new ArrayList<>();
-        List<String> tempoSport= new ArrayList<>();
-        List<List<String>> tempoEventSport= new ArrayList<>();
+        Map<Integer, List<String>> map = new HashMap<>();
+        List<String> tempo = new ArrayList<>();
+        List<String> tempoEvent = new ArrayList<>();
+        List<String> tempoSport = new ArrayList<>();
+        List<List<String>> tempoEventSport = new ArrayList<>();
         Set<Epreuve> epreuves = new HashSet<>();
-        Set<List<String>> set= new HashSet<>();
+        Set<List<String>> set = new HashSet<>();
 
         boolean boo = false;
         Sex tempoSex;
-        Sport futureSport= new Sport();
+        Sport futureSport = new Sport();
         Path chemin = Paths.get("liste_des_epreuves.csv");
         Path cheminEvent = Paths.get("evenements.csv");
         if (Files.isRegularFile(cheminEvent)) {
@@ -46,100 +46,95 @@ public class EpreuveService {
                     listTempoSportEvent.add(tempo.get(13));
                     tempoEventSport.add(listTempoSportEvent);
 
+                }
             }
         }
+        for (int i = 1; i < tempoEventSport.size(); i++) {
+            set.add(tempoEventSport.get(i));
         }
-        for (int i = 1; i < tempoEvent.size(); i++) {
-            List<String> listForSet = new ArrayList<>();
-            listForSet.add(tempoEvent.get(i));
-            listForSet.add(tempoSport.get(i));
-            set.add(listForSet);
-        }
-        for (List<String> listed:set){
+        for (List<String> listed : set) {
             System.out.println(listed);
         }
         List<List<String>> listOfList = new ArrayList<>(set);
 
-            //ID;Name;Sex;Age;Height;Weight;Team;NOC;Games;Year;Season;City;Sport;Event;Medal
+        //ID;Name;Sex;Age;Height;Weight;Team;NOC;Games;Year;Season;City;Sport;Event;Medal
 
 
-
-            if (Files.isRegularFile(chemin)) {
+        if (Files.isRegularFile(chemin)) {
             List<String> lignes = Files.readAllLines(chemin);
             for (String ligne : lignes) {
                 tempo.clear();
                 compteurTour++;
-                if(compteurTour%70==1){
+                if (compteurTour % 70 == 1) {
                     System.out.println(compteurTour);
                 }
-                tempoSex=Sex.MIXED;
+                tempoSex = Sex.MIXED;
                 if (!ligne.contains("Event")) {
                     String[] col = ligne.split(";");
-                    for (String nom : col) {
-                        if(nom.contains("(H)")){
-                            tempoSex=Sex.MEN;
-                        }
-                        if(nom.contains("(F)")){
-                            tempoSex=Sex.WOMEN;
-                        }
-
-
-                        nom=nom.replaceAll("\\(W\\)","");
-                        nom=nom.replaceAll("\\(M\\)","");
-                        nom=nom.replaceAll("\\(H\\)","");
-                        nom=nom.replaceAll("\\(F\\)","");
-                        nom=nom.replaceAll("\\(F\\+H\\)","");
-                        nom=nom.replaceAll("\\(H\\+F\\)","");
-                        nom=nom.replaceAll("\\(W\\+M\\)","");
-                        nom=nom.replaceAll("\\(M\\+W\\)","");
-                        for (int i = 1; i < listOfList.size(); i++) {
-                            if(tempoEvent.get(i).trim().equals(nom.trim())){
-                                TypedQuery<Sport> query = em.createQuery("select a from Sport a where a.nameEn=?1", Sport.class);
-                                query.setParameter(1, listOfList.get(i).get(1));
-                                futureSport=query.getSingleResult();
-                            }
-                        }
-                        nom=nom.replaceAll("\\(men\\)","");
-                        nom=nom.replaceAll("\\(women\\)","");
-                        nom=nom.replaceAll("Women's|women's","");
-                        nom=nom.replaceAll("Men's|men's","");
-                        nom=nom.replaceAll("women|Women","");
-                        nom=nom.replaceAll("men|Men","");
-                        nom=nom.replaceAll("mixte|Mixte|mixtes|Mixtes|mixed|Mixed","");
-
-                        tempo.add(nom.trim());
+                    String nom = col[0];
+                    String nomFr;
+                    try {
+                        nomFr = col[1];
+                    } catch (Exception exception) {
+                        nomFr = nom;
                     }
+                    if (nomFr.contains("(H)") || nom.contains("Men's")) {
+                        tempoSex = Sex.MEN;
+                    }
+                    if (nomFr.contains("(F)") || nom.contains("Women's")) {
+                        tempoSex = Sex.WOMEN;
+                    }
+
+
+                    nom = nom.replaceAll("\\(W\\)", "");
+                    nom = nom.replaceAll("\\(M\\)", "");
+                    nom = nom.replaceAll("\\(H\\)", "");
+                    nom = nom.replaceAll("\\(F\\)", "");
+                    nom = nom.replaceAll("\\(F\\+H\\)", "");
+                    nom = nom.replaceAll("\\(H\\+F\\)", "");
+                    nom = nom.replaceAll("\\(W\\+M\\)", "");
+                    nom = nom.replaceAll("\\(M\\+W\\)", "");
+                    for (int i = 1; i < listOfList.size(); i++) {
+                        if (listOfList.get(i).get(1).trim().equals(listOfList.get(i).get(0).trim()+" "+nom.trim())) {
+                            TypedQuery<Sport> query = em.createQuery("select a from Sport a where a.nameEn=?1", Sport.class);
+                            query.setParameter(1, listOfList.get(i).get(0));
+                            System.out.println(listOfList.get(i).get(0)+"ttttttttttttttt");
+                            futureSport = query.getSingleResult();
+                        }
+                    }
+                    nom = nom.replaceAll("\\(men\\)", "");
+                    nom = nom.replaceAll("\\(women\\)", "");
+                    nom = nom.replaceAll("Women's|women's", "");
+                    nom = nom.replaceAll("Men's|men's", "");
+                    nom = nom.replaceAll("women|Women", "");
+                    nom = nom.replaceAll("men|Men", "");
+                    nom = nom.replaceAll("mixte|Mixte|mixtes|Mixtes|mixed|Mixed", "");
+
+                    tempo.add(nom.trim());
+
                     Epreuve epreuve = new Epreuve();
 
 
-                    if(col.length==2){
-                        epreuve.setNameEn(tempo.get(0));
-                        epreuve.setNameFr(tempo.get(1));
-                        epreuve.setSex(tempoSex);
-                    }
-                    if(col.length==1){
-                        epreuve.setNameEn(tempo.get(0));
-                        epreuve.setNameFr(tempo.get(0));
+                    if (col.length == 2) {
+                        epreuve.setNameEn(nom.trim());
+                        epreuve.setNameFr(nomFr.trim());
                         epreuve.setSex(tempoSex);
                     }
 
                     epreuve.setSport(futureSport);
 
                     epreuves.add(epreuve);
-                    }
                 }
             }
-        else {
+        } else {
             System.out.println("PAS TROUVE");
         }
 
-        System.out.println(listOfList.size());
         transaction.begin();
         for (Epreuve epreuve : epreuves) {
             em.persist(epreuve);
         }
         transaction.commit();
-
 
 
     }

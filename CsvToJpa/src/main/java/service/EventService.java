@@ -120,7 +120,7 @@ public class EventService {
 
 
                     TypedQuery<Epreuve> query5 = em.createQuery("select a from Epreuve a where a.nameEn=?1 and a.sport.nameEn=?2 and a.sex=?3", Epreuve.class);
-                    query5.setParameter(1,nom);
+                    query5.setParameter(1,nom.trim());
                     query5.setParameter(2,tempo.get(12).trim());
                     query5.setParameter(3,sex);
 

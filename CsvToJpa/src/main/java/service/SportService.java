@@ -3,6 +3,7 @@ package service;
 import entite.Sport;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityTransaction;
+import repository.SportRepository;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -43,5 +44,10 @@ public class SportService {
             em.persist(sport);
         }
         transaction.commit();
+    }
+    SportRepository sportRepository;
+    public List<Sport> listAllSport() {
+        List<Sport> sportList = sportRepository.findAll();
+        return new ArrayList<>(sportList);
     }
 }
