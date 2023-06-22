@@ -30,13 +30,10 @@ public class EventService {
                 if(nbLignePasse%100==1){
                     System.out.println("-----------------------------------"+nbLignePasse);
                 System.out.println(nbLignePasse/lignes.size()*100+"%");}
-                if ((!ligne.contains("ID;")) && nbLignePasse<300 ) {
+                if ((!ligne.contains("ID;")) && nbLignePasse<1000 ) {
                     String[] col = ligne.split(";");
                     for (String nom : col) {
-                        while (nom.startsWith(" ") || nom.endsWith(" ")) {
-                            nom = nom.trim();
-                        }
-                        tempo.add(nom);
+                        tempo.add(nom.trim());
                     }
                     Evenement event = new Evenement();
 
@@ -44,7 +41,6 @@ public class EventService {
                     TypedQuery<Player> queryPlayer = em.createQuery("select a from Player a where a.name=?1", Player.class);
                     queryPlayer.setParameter(1,tempo.get(1).replaceAll("\"([^\"]*)\"","$1"));
                     event.setPlayer(queryPlayer.getSingleResult());
-
 
 
                     if(tempo.get(2).equals("M")){
@@ -105,7 +101,6 @@ public class EventService {
                     nom=nom.replaceAll("\\(H\\+F\\)","");
                     nom=nom.replaceAll("\\(W\\+M\\)","");
                     nom=nom.replaceAll("\\(M\\+W\\)","");
-                    nom=nom.replaceAll("\\(men\\)","");
                     Sex sex= Sex.MIXED;
                     if (tempo.get(13).contains("Men's") ||tempo.get(13).contains("Men")|| tempo.get(13).contains("men")) {
                         sex=Sex.MEN;
@@ -114,7 +109,8 @@ public class EventService {
                         sex=Sex.WOMEN;
                     }
                     System.out.println(nom);
-
+                    nom=nom.replaceAll("\\(men\\)","");
+                    nom=nom.replaceAll("\\(women\\)","");
                     nom=nom.replaceAll("Women's|women's","");
                     nom=nom.replaceAll("Men's|men's","");
                     nom=nom.replaceAll("women|Women","");
@@ -131,7 +127,11 @@ public class EventService {
 
 
                         System.out.println(tempo.get(12).trim()+"((((((((("+nom+"   "+sex);
-                   try{ event.setEpreuve(query5.getSingleResult());}catch(Exception exception){break;}
+                   try{ event.setEpreuve(query5.getSingleResult());}catch(Exception ignored){
+                       System.out.println(nom);
+                       System.out.println(tempo.get(12).trim());
+                       System.out.println(sex);
+                   }
 
 
                     //ID;Name;Sex;Age;Height;Weight;Team;NOC;Games;Year;Season;City;Sport;Event;Medal

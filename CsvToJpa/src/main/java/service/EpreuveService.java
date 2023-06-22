@@ -23,6 +23,7 @@ public class EpreuveService {
         List<String> tempo= new ArrayList<>();
         List<String> tempoEvent= new ArrayList<>();
         List<String> tempoSport= new ArrayList<>();
+        List<List<String>> tempoEventSport= new ArrayList<>();
         Set<Epreuve> epreuves = new HashSet<>();
         Set<List<String>> set= new HashSet<>();
 
@@ -40,6 +41,10 @@ public class EpreuveService {
                     tempo.addAll(Arrays.asList(col));
                     tempoEvent.add(tempo.get(13));
                     tempoSport.add(tempo.get(12));
+                    List<String> listTempoSportEvent = new ArrayList<>();
+                    listTempoSportEvent.add(tempo.get(12));
+                    listTempoSportEvent.add(tempo.get(13));
+                    tempoEventSport.add(listTempoSportEvent);
 
             }
         }
@@ -74,7 +79,7 @@ public class EpreuveService {
                         if(nom.contains("(H)")){
                             tempoSex=Sex.MEN;
                         }
-                        if(nom.contains("F")){
+                        if(nom.contains("(F)")){
                             tempoSex=Sex.WOMEN;
                         }
 
@@ -87,22 +92,22 @@ public class EpreuveService {
                         nom=nom.replaceAll("\\(H\\+F\\)","");
                         nom=nom.replaceAll("\\(W\\+M\\)","");
                         nom=nom.replaceAll("\\(M\\+W\\)","");
-                        nom=nom.replaceAll("\\(men\\)","");
                         for (int i = 1; i < listOfList.size(); i++) {
-                            if(tempoEvent.get(i).trim().equals((listOfList.get(i).get(1)+" "+nom).trim())){
+                            if(tempoEvent.get(i).trim().equals(nom.trim())){
                                 TypedQuery<Sport> query = em.createQuery("select a from Sport a where a.nameEn=?1", Sport.class);
                                 query.setParameter(1, listOfList.get(i).get(1));
                                 futureSport=query.getSingleResult();
                             }
                         }
+                        nom=nom.replaceAll("\\(men\\)","");
+                        nom=nom.replaceAll("\\(women\\)","");
                         nom=nom.replaceAll("Women's|women's","");
                         nom=nom.replaceAll("Men's|men's","");
                         nom=nom.replaceAll("women|Women","");
                         nom=nom.replaceAll("men|Men","");
                         nom=nom.replaceAll("mixte|Mixte|mixtes|Mixtes|mixed|Mixed","");
-                        nom=nom.trim();
 
-                        tempo.add(nom);
+                        tempo.add(nom.trim());
                     }
                     Epreuve epreuve = new Epreuve();
 
